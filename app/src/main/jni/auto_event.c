@@ -1,6 +1,3 @@
-//
-// Created by moyi on 2024/4/9.
-//
 
 #include "auto_event.h"
 #include <android/log.h>

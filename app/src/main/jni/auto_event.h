@@ -1,6 +1,4 @@
-//
-// Created by moyi on 2024/4/9.
-//
+
 
 #ifndef MAGICR_AUTO_EVENT_H
 #define MAGICR_AUTO_EVENT_H
