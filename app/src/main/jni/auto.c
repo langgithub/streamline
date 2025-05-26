@@ -9,95 +9,15 @@
 
 #define MODEL_VALUE_MAX 64
 #define UNKNOWN_MODEL "UNKNOWN"
-#define LOG_TAG "CPA.AUTO_EVENT"
+#define LOG_TAG "SHOW_TIME"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 
 
 // getevent -lt
-struct event_prop VIVO_S15_PRO_PROP = {
-        "V2207A",
-        "/dev/input/event4",
-        10.344f,
-        10.343f,
-        9,
-        15,
-        9,
-        1
-};
-struct event_prop VIVO_X50_PROP = {
-        "V2001A",
-        "/dev/input/event5",
-        1.333f,
-        1.313f,
-        6,
-        10,
-        6,
-        0
-};
-struct event_prop VIVO_IQOO_Z3_PROP = {
-        "V2073A",
-        "/dev/input/event5",
-        1.0f,
-        1.0f,
-        1,
-        4,
-        1,
-        0
-};
-struct event_prop VIVO_S16_PRO_PROP = {
-        "V2245A",
-        "/dev/input/event4",
-        10.0f,
-        10.0f,
-        12,
-        16,
-        8,
-        1
-};
-struct event_prop VIVO_X80_PROP = {
-        "V2183A",
-        "/dev/input/event5",
-        8.533f,
-        8.533f,
-        10,
-        10,
-        10,
-        0
-};
-struct event_prop VIVO_X80_2_PROP = {
-        "V2183A",
-        "/dev/input/event5",
-        10.240f,
-        10.240f,
-        10,
-        10,
-        10,
-        0
-};
-struct event_prop VIVO_Y35_PROP = {
-        "V2230A",
-        "/dev/input/event3",
-        1.0f,
-        1.0f,
-        20,
-        34,
-        20,
-        0
-};
-struct event_prop VIVO_S12_PROP = {
-        "V2162A",
-        "/dev/input/event3",
-        7.111f,
-        7.253f,
-        25,
-        46,
-        25,
-        0
-};
-struct event_prop OPPO_PJT110 = {
-        "PJT110",
-        "/dev/input/event4",
+struct event_prop ReadMi_13r = {
+        "23124RN87C",
+        "/dev/input/event2",
         7.111f,
         7.253f,
         25,
@@ -108,14 +28,7 @@ struct event_prop OPPO_PJT110 = {
 
 #define PROP_LIST_SIZE 0x10
 struct event_prop *event_prop_list[PROP_LIST_SIZE] = {
-        &VIVO_S15_PRO_PROP,
-        &VIVO_X50_PROP,
-        &VIVO_IQOO_Z3_PROP,
-        &VIVO_S16_PRO_PROP,
-        &VIVO_X80_PROP,
-        &VIVO_Y35_PROP,
-        &VIVO_S12_PROP,
-        &OPPO_PJT110
+        &ReadMi_13r
 };
 
 
