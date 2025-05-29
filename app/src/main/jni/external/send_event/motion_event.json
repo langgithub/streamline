@@ -1,0 +1,44 @@
+{
+  "downTime": 43438848,
+  "eventTime": 43439053,
+  "action": 1,
+  "pointerCount": 1,
+  "pointerIds": [
+    0
+  ],
+  "x": [
+    361.7246
+  ],
+  "y": [
+    961.4248
+  ],
+  "pressure": [
+    1
+  ],
+  "size": [
+    0.010555556,    框架提供计算
+  ],
+  "toolType": [
+    1
+  ],
+  "metaState": 0,   框架提供
+  "buttonState": 0, 框架提供
+  "xPrecision": 13.333333015441895,  框架提供
+  "yPrecision": 13.333333015441895,  框架提供
+  "deviceId": 6,
+  "edgeFlags": 0,  框架提供
+  "source": 4098,  框架提供
+  "flags": 1048576,  框架提供
+  "touchMajor": [
+    13.200001
+  ],
+  "touchMinor": [
+    9.6
+  ],
+  "toolMajor": [
+    0
+  ],
+  "toolMinor": [
+    0
+  ]
+}
