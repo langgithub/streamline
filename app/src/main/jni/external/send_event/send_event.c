@@ -7,11 +7,14 @@
 #include <sys/time.h>
 #include <jni.h>
 #include <android/log.h>
+#include <time.h>
+#include <unistd.h>
 #include "json_object.h"
 #include "json_tokener.h"
 
-#define LOG_TAG "MotionInject"
+#define LOG_TAG "MyActivity"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
+
 
 static void emit(int fd, int type, int code, int value) {
     struct input_event ie;
@@ -52,12 +55,28 @@ void inject_sequence_from_json_array(const char* path, const char* json_array_st
         return;
     }
 
+    struct timespec start, event_time;
+    // 获取开始时间
+    clock_gettime(CLOCK_MONOTONIC, &start);
+
     int len = json_object_array_length(root_array);
     for (int idx = 0; idx < len; ++idx) {
         struct json_object* obj = json_object_array_get_idx(root_array, idx);
 
         int pointerCount = json_object_get_int(json_object_object_get(obj, "pointerCount"));
         int action = json_object_get_int(json_object_object_get(obj, "action"));
+        int downTime = json_object_get_int(json_object_object_get(obj, "downTime"));
+        int eventTime = json_object_get_int(json_object_object_get(obj, "eventTime"));
+        // 计算时间差（毫秒）
+        if(idx > 0){
+            long duration = (event_time.tv_sec - start.tv_sec) * 1000 + (event_time.tv_nsec - start.tv_nsec) / 1000000;
+            long sleep_time = (eventTime - downTime) - duration;
+            LOGI("注入操作耗时: %ld 毫秒   和原始数据相比相差：%ld", duration, sleep_time);
+            if(sleep_time > 0){
+                usleep(sleep_time * 1000);
+            }
+        }
+
 
         struct json_object *jx = json_object_object_get(obj, "x");
         struct json_object *jy = json_object_object_get(obj, "y");
@@ -83,19 +102,22 @@ void inject_sequence_from_json_array(const char* path, const char* json_array_st
         extract_int_array(jid, pid, pointerCount);
         extract_int_array(jtooltype, toolType, pointerCount);
 
+
+
         for (int i = 0; i < pointerCount; i++) {
             emit(fd, EV_ABS, ABS_MT_SLOT, i);
             if (action == 0 /* down */ || action == 2 /* move */) {
                 emit(fd, EV_ABS, ABS_MT_TRACKING_ID, pid[i]);
                 emit(fd, EV_ABS, ABS_MT_POSITION_X, (int)x[i]);
                 emit(fd, EV_ABS, ABS_MT_POSITION_Y, (int)y[i]);
-                emit(fd, EV_ABS, ABS_MT_PRESSURE, (int)(pressure[i]));
+                emit(fd, EV_ABS, ABS_MT_PRESSURE, 1000);  // 压力恒等于1
                 emit(fd, EV_ABS, ABS_MT_TOUCH_MAJOR, (int)(touchMajor[i]));
                 emit(fd, EV_ABS, ABS_MT_TOUCH_MINOR, (int)(touchMinor[i]));
                 emit(fd, EV_ABS, ABS_MT_TOOL_TYPE, toolType[i]);
             } else if (action == 1 /* up */) {
                 emit(fd, EV_ABS, ABS_MT_TRACKING_ID, -1);
             }
+            LOGI("%d, %d, %d, %d, %d, %d, %d", pid[i], (int)x[i], (int)y[i], (int)(pressure[i]), (int)(touchMajor[i]),(int)(touchMinor[i]), toolType[i]);
         }
 
         if (action == 0) {
@@ -105,7 +127,9 @@ void inject_sequence_from_json_array(const char* path, const char* json_array_st
         }
 
         emit(fd, EV_SYN, SYN_REPORT, 0);
-        usleep(5000);  // simulate realistic timing
+
+        // 获取结束时间
+        clock_gettime(CLOCK_MONOTONIC, &event_time);
 
         free(x);
         free(y);

@@ -16,6 +16,7 @@
 
 
 // getevent -lt
+// ./send_event /dev/input/event2
 struct event_prop ReadMi_13r = {
         "23124RN87C",
         "/dev/input/event2",
