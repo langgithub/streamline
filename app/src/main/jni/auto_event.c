@@ -8,7 +8,7 @@
 #include <stdlib.h>
 #include <time.h>
 
-#define LOG_TAG "CPA.AUTO_EVENT"
+#define LOG_TAG "SHOW_TIME"
 #define LOGD(...) __android_log_print(ANDROID_LOG_DEBUG, LOG_TAG, __VA_ARGS__)
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
 

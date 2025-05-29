@@ -36,3 +36,13 @@ target_link_libraries(${CMAKE_PROJECT_NAME}
         # List libraries link to the target library
         android
         log)
+
+add_subdirectory(${CMAKE_SOURCE_DIR}/external/send_event)
+add_subdirectory(${CMAKE_SOURCE_DIR}/external/json-c)
+
+## 可选：复制 .so 为可执行工具到 /data/local/tmp（调试时）
+#add_custom_command(TARGET send_event_exec POST_BUILD
+#        COMMAND ${CMAKE_COMMAND} -E copy
+#        $<TARGET_FILE:send_event_exec>
+#        ${CMAKE_SOURCE_DIR}/app/src/main/assets/send_event
+#)

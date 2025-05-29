@@ -5,6 +5,7 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <stdbool.h>
+#include <unistd.h>
 #include "auto_event.h"
 
 #define MODEL_VALUE_MAX 64
@@ -64,8 +65,10 @@ Java_com_lang_streamline_utils_AutoEventNativeUtils_click(JNIEnv *env, jclass cl
     }
     errno = 0;
     LOGI("path -> %s", prop->path);
+    LOGI("uid=%d euid=%d", getuid(), geteuid());
     int fd = open(prop->path, O_RDWR);
     if (fd < 0 && errno == 13) {
+        LOGI("权限不够");
         return -3;
     }
     int result = click(prop, x, y);
@@ -117,4 +120,12 @@ Java_com_lang_streamline_utils_AutoEventNativeUtils_getPrecious(JNIEnv *env,
     jfloat values[] = {prop->x_precision, prop->y_precision};
     (*env)->SetFloatArrayRegion(env, result, 0, 2, values);
     return result;
+}
+
+JNIEXPORT jint JNICALL
+Java_com_lang_streamline_utils_AutoEventNativeUtils_rootify(JNIEnv* env, jclass clazz) {
+    if (setgid(0)!=0 || setuid(0)!=0) {
+        return -1; // 失败
+    }
+    return 0;    // 成功
 }

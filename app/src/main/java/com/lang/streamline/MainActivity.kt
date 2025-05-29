@@ -38,12 +38,16 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.android.permission.FloatWindowManager
+import com.lang.streamline.hhh.MotionEventModel
 import com.lang.streamline.ui.theme.TestUiAutomator2Theme
 import com.lang.streamline.utils.AutoEventNativeUtils
 import com.lang.streamline.utils.DisplayUtils
 import com.lang.streamline.utils.EditTextClass
+import com.lang.streamline.utils.InputManagerMirror
+import com.lang.streamline.utils.SimpleInteractionController
 import com.lang.streamline.utils.WindowManagerGlobalMirror
 import org.json.JSONObject
+import java.util.Objects
 import kotlin.concurrent.thread
 
 
@@ -53,6 +57,7 @@ class MainActivity : ComponentActivity() {
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         Log.e("MyActivity", "xxx dispatchTouchEvent: " + ev.device.sources)
+        Log.e("MyActivity", MotionEventModel(ev).toJSONObject().toString())
         return super.dispatchTouchEvent(ev)
     }
 //    @SuppressLint("RestrictedApi")
@@ -151,6 +156,23 @@ class MainActivity : ComponentActivity() {
 
                             EditTextClass().triggerBack(this)
                             Log.i("MyActivity", DisplayUtils.hasNavigationBar(this).toString())
+                        },
+                        onInputManagerClick = {
+                            Log.d("MyActivity","提权成功")
+//                            if (AutoEventNativeUtils.rootify()==0) {
+//                                // 进程的 euid/egid 都变成 0 了
+//                                Log.d("MyActivity","提权成功")
+//                            } else {
+//                                // 提权失败，看看是不是 SELinux／capabilities 限制
+//                            }
+//                            // 1. 直接调用需要用户有 system root 权限
+//                            // root 条件下 被selinux 拦截了
+//                            // [ 8493.342542] type=1400 audit(1748252712.828:976): avc: denied { search } for comm="lang.streamline" name="input" dev="tmpfs" ino=729 scontext=u:r:untrusted_app:s0:c246,c256,c512,c768 tcontext=u:object_r:input_device:s0 tclass=dir permissive=0 app=com.lang.streamline
+//                            AutoEventNativeUtils.click(365,325)
+                            // 2.
+//                            Log.d("MyActivity", applicationContext.checkCallingPermission("android.permission.INJECT_EVENTS").toString())
+//                            var controller = SimpleInteractionController(InputManagerMirror())
+//                            controller.click(365F, 325F)
                         }
                     )
                 }
@@ -234,6 +256,7 @@ fun Greeting(
     onButtonClick: () -> Unit,
     onEditTextCreated: (EditText) -> Unit,
     onAutoEdit: () -> Unit,
+    onInputManagerClick: () -> Unit,
 ) {
     // 用 Column 安排文本和按钮
     Column(modifier = modifier.padding(16.dp)) {
@@ -280,12 +303,7 @@ fun Greeting(
             Text(text = "测试自动化EditText")
         }
         Button(
-            onClick = {
-                // 1. 直接调用需要用户有 system root 权限
-                AutoEventNativeUtils.click(365,325)
-                // 2.
-//                InputManage
-            },
+            onClick = { onInputManagerClick() },
             modifier = Modifier.padding(top = 16.dp)
         ) {
             Text(text = "测试点击365，325")
@@ -297,6 +315,6 @@ fun Greeting(
 @Composable
 fun GreetingPreview() {
     TestUiAutomator2Theme {
-        Greeting(name = "Android", onButtonClick = {}, onEditTextCreated = {}, onAutoEdit={})
+        Greeting(name = "Android", onButtonClick = {}, onEditTextCreated = {}, onAutoEdit={}, onInputManagerClick={})
     }
 }
