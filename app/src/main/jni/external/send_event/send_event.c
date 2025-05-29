@@ -11,9 +11,41 @@
 #include <unistd.h>
 #include "json_object.h"
 #include "json_tokener.h"
+#include "send_event.h"
 
 #define LOG_TAG "MyActivity"
 #define LOGI(...) __android_log_print(ANDROID_LOG_INFO, LOG_TAG, __VA_ARGS__)
+#define MODEL_VALUE_MAX 64
+#define UNKNOWN_MODEL "UNKNOWN"
+
+
+struct event_prop ReadMi_13r = {
+        "23124RN87C",
+        "/dev/input/event2"
+};
+
+#define PROP_LIST_SIZE 0x10
+struct event_prop *event_prop_list[PROP_LIST_SIZE] = {
+        &ReadMi_13r
+};
+
+
+struct event_prop *get_event_prop(const char *model) {
+    for (int i = 0; i < PROP_LIST_SIZE; i++) {
+        if (strcmp(event_prop_list[i]->model, model) == 0) {
+            return event_prop_list[i];
+        }
+    }
+    return NULL;
+}
+
+char *get_build_model() {
+    static char model[MODEL_VALUE_MAX];
+    if (__system_property_get("ro.product.model", model) > 0) {
+        return model;
+    }
+    return UNKNOWN_MODEL;
+}
 
 
 static void emit(int fd, int type, int code, int value) {
@@ -145,14 +177,23 @@ void inject_sequence_from_json_array(const char* path, const char* json_array_st
 }
 
 int main(int argc, char *argv[]) {
-    if (argc != 3) {
-        fprintf(stderr, "Usage: %s <input_device> <json_file>\n", argv[0]);
+    if (argc != 2) {
+        fprintf(stderr, "Usage: %s <json_file>\n", argv[0]);
         return 1;
     }
 
-    const char *device_path = argv[1];
-    const char *json_path = argv[2];
+    char *model = get_build_model();
+    if (strcmp(model, UNKNOWN_MODEL) == 0) {
+        fprintf(stderr, " 不支持的设备 \n");
+        return 1;
+    }
+    struct event_prop *prop = get_event_prop(model);
+    if (prop == NULL) {
+        fprintf(stderr, " 改设备没有指定input\n");
+        return 1;
+    }
 
+    const char *json_path = argv[1];
     FILE *file = fopen(json_path, "r");
     if (!file) {
         perror("Failed to open JSON file");
@@ -168,7 +209,7 @@ int main(int argc, char *argv[]) {
     buffer[len] = '\0';
     fclose(file);
 
-    inject_sequence_from_json_array(device_path, buffer);
+    inject_sequence_from_json_array(prop->path, buffer);
 
     free(buffer);
     return 0;
