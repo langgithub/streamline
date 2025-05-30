@@ -2,6 +2,7 @@ package com.lang.streamline
 
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.annotation.SuppressLint
+import android.content.Context
 import android.hardware.input.InputManager
 import android.os.Build
 import android.os.Bundle
@@ -41,12 +42,16 @@ import com.android.permission.FloatWindowManager
 import com.lang.streamline.hhh.MotionEventModel
 import com.lang.streamline.ui.theme.TestUiAutomator2Theme
 import com.lang.streamline.utils.AutoEventNativeUtils
+import com.lang.streamline.utils.Command
 import com.lang.streamline.utils.DisplayUtils
 import com.lang.streamline.utils.EditTextClass
 import com.lang.streamline.utils.InputManagerMirror
+import com.lang.streamline.utils.MotionEventAssetsCopier
 import com.lang.streamline.utils.SimpleInteractionController
 import com.lang.streamline.utils.WindowManagerGlobalMirror
 import org.json.JSONObject
+import java.io.File
+import java.io.FileOutputStream
 import java.util.Objects
 import kotlin.concurrent.thread
 
@@ -54,6 +59,7 @@ import kotlin.concurrent.thread
 class MainActivity : ComponentActivity() {
     private var floatView: FloatView? = null
     private var searchBar: EditText? = null
+    private var excutePath: String? = null
 
     override fun dispatchTouchEvent(ev: MotionEvent): Boolean {
         Log.e("MyActivity", "xxx dispatchTouchEvent: " + ev.device.sources)
@@ -158,28 +164,24 @@ class MainActivity : ComponentActivity() {
                             Log.i("MyActivity", DisplayUtils.hasNavigationBar(this).toString())
                         },
                         onInputManagerClick = {
-                            Log.d("MyActivity","提权成功")
-//                            if (AutoEventNativeUtils.rootify()==0) {
-//                                // 进程的 euid/egid 都变成 0 了
-//                                Log.d("MyActivity","提权成功")
-//                            } else {
-//                                // 提权失败，看看是不是 SELinux／capabilities 限制
-//                            }
-//                            // 1. 直接调用需要用户有 system root 权限
-//                            // root 条件下 被selinux 拦截了
-//                            // [ 8493.342542] type=1400 audit(1748252712.828:976): avc: denied { search } for comm="lang.streamline" name="input" dev="tmpfs" ino=729 scontext=u:r:untrusted_app:s0:c246,c256,c512,c768 tcontext=u:object_r:input_device:s0 tclass=dir permissive=0 app=com.lang.streamline
-//                            AutoEventNativeUtils.click(365,325)
-                            // 2.
-//                            Log.d("MyActivity", applicationContext.checkCallingPermission("android.permission.INJECT_EVENTS").toString())
-//                            var controller = SimpleInteractionController(InputManagerMirror())
-//                            controller.click(365F, 325F)
+                            // 利用root 注入事件
+//                            val clilck = applicationContext.filesDir.absolutePath+"/click.json"
+//                            val cmd = "getprop zxcvbnm1 -c '${excutePath} $clilck'"
+//                            Log.d("MyActivity","执行cmd:$cmd")
+//                            Command.call(cmd)
+
+                            // 
+
+
                         }
                     )
                 }
             }
         }
-    }
 
+        MotionEventAssetsCopier().copyAssetsToFiles(applicationContext)
+        excutePath = applicationContext.filesDir.absolutePath+"/arm64-v8a/send_event"
+    }
 
     /**
      * 检查是否有悬浮窗权限，然后初始化并显示 FloatView

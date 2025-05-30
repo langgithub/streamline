@@ -99,3 +99,27 @@ dependencies {
     androidTestImplementation(libs.androidx.ui.test.junit4)
 
 }
+
+// 1. 注册一个 Copy 任务，把编译产物拷贝到 assets
+val copySendEvent by tasks.registering(Copy::class) {
+    // 你的可执行文件路径
+    val exeFile = file("$buildDir/intermediates/cxx/Debug/25a322m5/obj/arm64-v8a/send_event")
+
+    // 如果存在就拷贝
+    if (exeFile.exists()) {
+        from(exeFile) {
+            // 路径里的 abi 名称，这里硬编码为 arm64-v8a
+            into("arm64-v8a")
+            // 设置文件权限为 0755
+            fileMode = 0b111101101  // 等同于 0755
+        }
+    }
+
+    // 最终拷贝到 module 下的 src/main/assets
+    into("$projectDir/src/main/assets")
+}
+
+// 2. 让 preBuild 依赖于这个拷贝任务，保证每次编译前都会执行
+tasks.named("preBuild") {
+    dependsOn(copySendEvent)
+}
