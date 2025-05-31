@@ -91,5 +91,33 @@ class Command {
                 process.waitFor()
             }
         }
+
+        @JvmStatic
+        fun callNormal(cmd: String) {
+            // 启动一个 shell 进程
+            val process = Runtime.getRuntime().exec("sh")
+
+            thread(start = true) {
+                process.inputStream.bufferedReader().forEachLine { line ->
+                    println("Output: $line")
+                }
+            }
+
+            // 创建线程持续读取错误输出
+            thread(start = true) {
+                process.errorStream.bufferedReader().forEachLine { line ->
+                    println("Error: $line")
+                }
+            }
+
+            // 向 shell 写入命令，并发送 exit 命令以退出 shell
+            process.outputStream.use { os ->
+                os.write(cmd.toByteArray())
+                os.write("\nexit".toByteArray())
+                os.flush()
+            }
+            // 等待进程结束（可选）
+            process.waitFor()
+        }
     }
 }

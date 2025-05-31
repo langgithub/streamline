@@ -2,8 +2,8 @@ package com.lang.streamline
 
 import android.accessibilityservice.AccessibilityServiceInfo
 import android.annotation.SuppressLint
+import android.app.assist.AssistContent
 import android.content.Context
-import android.hardware.input.InputManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
@@ -11,10 +11,14 @@ import android.os.Looper
 import android.text.Editable
 import android.text.InputType
 import android.text.TextWatcher
+import android.util.DisplayMetrics
 import android.util.Log
+import android.view.Display
 import android.view.KeyEvent
 import android.view.MotionEvent
+import android.view.Surface
 import android.view.ViewGroup
+import android.view.WindowManager
 import android.view.accessibility.AccessibilityManager
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputConnection
@@ -41,18 +45,11 @@ import androidx.compose.ui.viewinterop.AndroidView
 import com.android.permission.FloatWindowManager
 import com.lang.streamline.hhh.MotionEventModel
 import com.lang.streamline.ui.theme.TestUiAutomator2Theme
-import com.lang.streamline.utils.AutoEventNativeUtils
-import com.lang.streamline.utils.Command
 import com.lang.streamline.utils.DisplayUtils
 import com.lang.streamline.utils.EditTextClass
-import com.lang.streamline.utils.InputManagerMirror
 import com.lang.streamline.utils.MotionEventAssetsCopier
-import com.lang.streamline.utils.SimpleInteractionController
 import com.lang.streamline.utils.WindowManagerGlobalMirror
 import org.json.JSONObject
-import java.io.File
-import java.io.FileOutputStream
-import java.util.Objects
 import kotlin.concurrent.thread
 
 
@@ -170,7 +167,11 @@ class MainActivity : ComponentActivity() {
 //                            Log.d("MyActivity","执行cmd:$cmd")
 //                            Command.call(cmd)
 
-                            // 
+                            //
+//                            AccessibilityMSIPC().doCollect()
+//                            var takeShot = "%s "
+//                            Command.call(cmd)
+                            captureScreenshot(applicationContext)
 
 
                         }
@@ -181,6 +182,49 @@ class MainActivity : ComponentActivity() {
 
         MotionEventAssetsCopier().copyAssetsToFiles(applicationContext)
         excutePath = applicationContext.filesDir.absolutePath+"/arm64-v8a/send_event"
+//        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE,
+//            WindowManager.LayoutParams.FLAG_SECURE);
+    }
+
+    private fun captureScreenshot(context: Context) {
+        try {
+            // 获取屏幕尺寸与方向
+            val wm: WindowManager = context.getSystemService(WINDOW_SERVICE) as WindowManager
+            val display: Display = wm.defaultDisplay
+            val metrics: DisplayMetrics = DisplayMetrics()
+            display.getRealMetrics(metrics)
+
+            val width: Int = metrics.widthPixels
+            val height: Int = metrics.heightPixels
+
+            // 方向：0=竖屏，1=横屏等
+            val rotation: Int = display.getRotation()
+            val orientationDegrees = when (rotation) {
+                Surface.ROTATION_0 -> 0
+                Surface.ROTATION_90 -> 90
+                Surface.ROTATION_180 -> 180
+                Surface.ROTATION_270 -> 270
+                else -> 0
+            }
+
+            val param = String.format(
+                "-P %dx%d@%dx%d/%d",
+                width, height, width, height, orientationDegrees
+            )
+
+            var cmd = String.format(
+                "getprop zxcvbnm1 -c 'LD_LIBRARY_PATH=%s %s/minicap %s -s > /sdcard/Download/screen.jpg'",
+                context.filesDir.absolutePath+"/arm64-v8a",
+                context.filesDir.absolutePath+"/arm64-v8a",
+                param
+            )
+            Log.d("Minicap", "cmd: ${cmd.toString()}")
+            val process = Runtime.getRuntime().exec(cmd)
+            val resultCode = process.waitFor()
+            Log.d("Minicap", "Capture result: $resultCode")
+        } catch (e: Exception) {
+            Log.e("Minicap", "Failed to capture screenshot", e)
+        }
     }
 
     /**
@@ -202,6 +246,12 @@ class MainActivity : ComponentActivity() {
             isAccessibilityServiceActive()
         }
     }
+
+    override fun onProvideAssistContent(outContent: AssistContent?) {
+        // 会在系统准备截图/抓取内容时回调，例如 Google Assistant、screencap 等系统行为
+        Log.i("MainActivity", "监听截图回调")
+    }
+
     fun isAccessibilityServiceActive(): Boolean {
         val am: AccessibilityManager = applicationContext.getSystemService(ACCESSIBILITY_SERVICE) as AccessibilityManager
         val services: List<AccessibilityServiceInfo> = am.getEnabledAccessibilityServiceList(
