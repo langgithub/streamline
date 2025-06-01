@@ -44,6 +44,10 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.android.permission.FloatWindowManager
 import com.lang.streamline.hhh.MotionEventModel
+import com.lang.streamline.network.ClaimSecretRequest
+import com.lang.streamline.network.ISecretApi
+import com.lang.streamline.network.NewRetrofitCallback
+import com.lang.streamline.network.RetrofitClient
 import com.lang.streamline.ui.theme.TestUiAutomator2Theme
 import com.lang.streamline.utils.DisplayUtils
 import com.lang.streamline.utils.EditTextClass
@@ -171,9 +175,24 @@ class MainActivity : ComponentActivity() {
 //                            AccessibilityMSIPC().doCollect()
 //                            var takeShot = "%s "
 //                            Command.call(cmd)
-                            captureScreenshot(applicationContext)
+//                            captureScreenshot(applicationContext)
 
+                            RetrofitClient.getInstance().createService(ISecretApi::class.java).queryPlugins(
+                                ClaimSecretRequest("123456", "123456")
+                            ).enqueue(object : NewRetrofitCallback<String?>() {
+                                    override fun onSuccess(result: String?) {
+                                        if (result != null) {
+                                            Log.d("MyActivity", result)
+                                        }
+                                    }
 
+                                    override fun onError(message: String?) {
+                                        super.onError(message)
+                                        if (message != null) {
+                                            Log.d("MyActivity", message)
+                                        }
+                                    }
+                                })
                         }
                     )
                 }

@@ -19,7 +19,7 @@
       <option name="previewFile" value="true" />
     </inspection_tool>
     <inspection_tool class="ExtractMethodRecommender" enabled="true" level="WARNING" enabled_by_default="true">
-      <option name="minLength" value="560" />
+      <option name="minLength" value="2489" />
     </inspection_tool>
     <inspection_tool class="GlancePreviewDimensionRespectsLimit" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="composableFile" value="true" />
