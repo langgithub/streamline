@@ -7,11 +7,13 @@ import android.icu.text.Transliterator;
 import android.os.Build;
 import android.os.SystemClock;
 import android.text.InputType;
+import android.util.Log;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputConnection;
+import android.view.inputmethod.InputConnectionWrapper;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.EditText;
 
@@ -22,6 +24,7 @@ import java.util.concurrent.CountDownLatch;
 
 public class EditTextClass {
 
+    private static String tag = "EditTextClass";
     @SuppressLint("NewApi")
     public static void autoInputEditTextExecute(EditText searchBar, String keywordsStr) {
         try{
@@ -36,14 +39,17 @@ public class EditTextClass {
             // 删除内容
             CountDownLatch deleteLatch = new CountDownLatch(1);
             new Thread(() -> {
-                final int len = searchBar.getText().length();
-                for (int i = 0; i < len; i++) {
-                    try { Thread.sleep(100); } catch (InterruptedException ignored) {}
-                    searchBar.post(() -> {
-                        InputConnection ic = createIc(searchBar);
-                        ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL));
-                        ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP,   KeyEvent.KEYCODE_DEL));
-                    });
+                int len = searchBar.getText().length();
+                while (len != 0){
+                    for (int i = 0; i < len; i++) {
+                        try { Thread.sleep(100); } catch (InterruptedException ignored) {}
+                        searchBar.post(() -> {
+                            InputConnection ic = createIc(searchBar);
+                            ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_DEL));
+                            ic.sendKeyEvent(new KeyEvent(KeyEvent.ACTION_UP,   KeyEvent.KEYCODE_DEL));
+                        });
+                    }
+                    len = searchBar.getText().length();
                 }
                 deleteLatch.countDown();
             }).start();
@@ -60,12 +66,14 @@ public class EditTextClass {
                 for (int wi = 0; wi < words.length; wi++) {
                     String word = words[wi];
                     String pinyin = pinyins[wi];
+                    Log.d(tag, pinyin);
                     // 输入拼音
-                    for (int i = 1; i <= pinyin.length(); i++) {
+                    for (int i = 1; i <= Math.min(pinyin.length(), 28); i++) {
                         final String sub = pinyin.substring(0, i);
                         searchBar.post(() -> ic.setComposingText(sub, 1));
                         try { Thread.sleep(charDelay); } catch (InterruptedException ignored) {}
                     }
+                    Log.d(tag, word);
                     // 选择内容
                     searchBar.post(() -> {
                         ic.commitText(word, 1);
@@ -104,7 +112,31 @@ public class EditTextClass {
         EditorInfo ei = new EditorInfo();
         ei.inputType  = InputType.TYPE_CLASS_TEXT;
         ei.imeOptions = EditorInfo.IME_FLAG_NO_EXTRACT_UI;
-        return editText.onCreateInputConnection(ei);
+        InputConnection baseIc = editText.onCreateInputConnection(ei);
+        if (baseIc == null) return null;
+        return new InputConnectionWrapper(baseIc, true) {
+            @Override
+            public boolean setComposingText(CharSequence text, int newCursorPosition) {
+//                boolean result = super.setComposingText(text, newCursorPosition);
+                Log.d(tag, "setComposingText=>"+text);
+                return true;
+            }
+
+            @Override
+            public boolean commitText(CharSequence text, int newCursorPosition) {
+                // 同样什么也不做
+                boolean result = super.commitText(text, newCursorPosition);
+                Log.d(tag, result+"commitText=>"+text);
+                return result;
+            }
+
+            @Override
+            public boolean finishComposingText() {
+                boolean result = super.finishComposingText();
+                Log.d(tag, result+"finishComposingText->");
+                return result;
+            }
+        };
     }
 
     /**

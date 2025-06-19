@@ -144,24 +144,24 @@ class MainActivity : ComponentActivity() {
                             searchBar = et
                         },
                         onAutoEdit = {
-//                            thread(start = true){
-//                                EditTextClass.autoInputEditTextExecute(searchBar, "输撒 发射 a")
-//                                Log.i("TAG", "ok1")
-//                                thread(start = true){
-//                                    EditTextClass.autoInputEditTextExecute(searchBar, "cf a")
-//                                    Log.i("TAG", "ok")
-//                                    thread(start = true){
-//                                        EditTextClass.autoInputEditTextExecute(searchBar, "111 cf 点法发入 a")
-//                                        Log.i("TAG", "ok")
-//
-//                                    }
-//                                }
-//                            }
-                            val views = WindowManagerGlobalMirror.getWindowViews(
-                                WindowManagerGlobalMirror.getInstance(null)
-                            )
+                            thread(start = true){
+                                EditTextClass.autoInputEditTextExecute(searchBar, "输撒 发射 aasdfasfdafasfasf 中国三甲基计算机")
+                                Log.i("TAG", "ok1")
+                                thread(start = true){
+                                    EditTextClass.autoInputEditTextExecute(searchBar, "cf a")
+                                    Log.i("TAG", "ok")
+                                    thread(start = true){
+                                        EditTextClass.autoInputEditTextExecute(searchBar, "111 cf 点法发入 a 考虑是否就正式访问")
+                                        Log.i("TAG", "ok")
 
-                            EditTextClass().triggerBack(this)
+                                    }
+                                }
+                            }
+//                            val views = WindowManagerGlobalMirror.getWindowViews(
+//                                WindowManagerGlobalMirror.getInstance(null)
+//                            )
+//
+//                            EditTextClass().triggerBack(this)
                             Log.i("MyActivity", DisplayUtils.hasNavigationBar(this).toString())
                         },
                         onInputManagerClick = {
@@ -177,22 +177,22 @@ class MainActivity : ComponentActivity() {
 //                            Command.call(cmd)
 //                            captureScreenshot(applicationContext)
 
-                            RetrofitClient.getInstance().createService(ISecretApi::class.java).queryPlugins(
-                                ClaimSecretRequest("123456", "123456")
-                            ).enqueue(object : NewRetrofitCallback<String?>() {
-                                    override fun onSuccess(result: String?) {
-                                        if (result != null) {
-                                            Log.d("MyActivity", result)
-                                        }
-                                    }
-
-                                    override fun onError(message: String?) {
-                                        super.onError(message)
-                                        if (message != null) {
-                                            Log.d("MyActivity", message)
-                                        }
-                                    }
-                                })
+//                            RetrofitClient.getInstance().createService(ISecretApi::class.java).queryPlugins(
+//                                ClaimSecretRequest("123456", "123456")
+//                            ).enqueue(object : NewRetrofitCallback<String?>() {
+//                                    override fun onSuccess(result: String?) {
+//                                        if (result != null) {
+//                                            Log.d("MyActivity", result)
+//                                        }
+//                                    }
+//
+//                                    override fun onError(message: String?) {
+//                                        super.onError(message)
+//                                        if (message != null) {
+//                                            Log.d("MyActivity", message)
+//                                        }
+//                                    }
+//                                })
                         }
                     )
                 }
